@@ -1,5 +1,5 @@
 #include "matrix_algebra.h"
-#inlude <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 
