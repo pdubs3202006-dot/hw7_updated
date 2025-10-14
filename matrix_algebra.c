@@ -1,4 +1,5 @@
-#include "matrix_algebra.h"
+#include "MAT_ALG_H"
+
 
 //define a struct to represent an n by m matrix. 
 // the entries of this matrix should be doubles.
