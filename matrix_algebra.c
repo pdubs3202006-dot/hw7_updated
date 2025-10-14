@@ -1,4 +1,6 @@
-#include "MAT_ALG_H"
+#include "matrix_algebra.h"
+#inlude <stdio.h>
+#include <stdlib.h>
 
 
 //define a struct to represent an n by m matrix. 
