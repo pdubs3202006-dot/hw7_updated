@@ -79,7 +79,7 @@ mat* matrix_read(char* filename)
 	}
 
 	for (int i = 0; i < n; i++) {
-		size_t x = fread(&matrix->array[i], sizeof(double), m, file);
+		size_t x = fread(matrix->array[i], sizeof(double), m, file);
 		if (x != (size_t)m)
 		{
 			matrix_free(matrix);
