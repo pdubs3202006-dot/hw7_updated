@@ -1,7 +1,5 @@
 #include "matrix_algebra.h"
-#include <stdio.h>
 #include <stdlib.h>
-
 
 //define a struct to represent an n by m matrix. 
 // the entries of this matrix should be doubles.
@@ -17,6 +15,8 @@ mat* create_matrix(int n, int m)
 {
 	//Fill this function to return an n x m matrix of zeros.
 	//The matrix should be allocated on the heap (that is, you return a mat* pointer)
+
+	if (m <= 0 || n <= 0) return NULL;
 	mat* matrix = malloc(sizeof(mat));
 	if (!matrix) return NULL;
 	
@@ -24,19 +24,20 @@ mat* create_matrix(int n, int m)
 	matrix->m = m;
 
 	matrix->array = malloc(n * sizeof(double*));
-	if (!matrix->array) {
+	if (matrix->array == NULL) {
 		free(matrix);
 		return NULL;
 	}
 	
 	for(int i = 0; i < n; i++) {
 		matrix->array[i] = calloc(m, sizeof(double));
-		if (!matrix->array[i]) {
-            for (int j = 0; j < i; j++)
+		if (matrix->array[i] == NULL) {
+            for (int j = 0; j < i; j++) {
                 free(matrix->array[j]);
-            free(matrix->array);
-            free(matrix);
-            return NULL;
+            	free(matrix->array);
+            	free(matrix);
+            	return NULL;
+			}
         }
 	}
 	return matrix;
@@ -61,16 +62,20 @@ mat* matrix_read(char* filename)
 		fclose(file);
 		return NULL;
 	}
+	if (m <= 0 || n <= 0) 
+	{
+		fclose(file);
+		return NULL;
+	}
 	mat* matrix = create_matrix(n, m);
-	if (!matrix) {
+	if (matrix == NULL) {
 		fclose(file);
 		return NULL;
 	}
 
 	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < m; j++) {
-			if (fread(&matrix->array[i][j], sizeof(double), 1, file) != 1)
-			{
+		if (fread(&matrix->array[i], sizeof(double), m, file) != (size_t)m)
+		{
 				matrix_free(matrix);
 				fclose(file);
 				return NULL;
@@ -84,16 +89,17 @@ mat* matrix_read(char* filename)
 mat* matrix_multiply(mat* A, mat*B)
 {
 	//fill this function to return a new matrix AB, the product of A and B. Return NULL if the product does not exist.
+	if (A == NULL || B == NULL) return NULL;
 	if (A->m != B->n) {
 		return NULL;
 	}
-	double sum;
+
 	mat* matrix_AB = create_matrix(A->n, B->m);
-	if (!matrix_AB) return NULL;
+	if (matrix_AB == NULL) return NULL;
 
 	for (int i = 0; i < A->n; i++) {
 		for (int j = 0; j < B->m; j++) {
-			sum = 0.0;
+			double sum = 0.0;
 			for(int cntr = 0; cntr < A->m; cntr++)
 			{
 				sum += A->array[i][cntr] * B->array[cntr][j];
@@ -107,11 +113,12 @@ mat* matrix_multiply(mat* A, mat*B)
 mat* matrix_add(mat* A, mat* B)
 {
 	//fill this function to return the matrix A+B, the addition of A and B. Return NULL if the addition does not exist.
+	if (A == NULL || B == NULL) return NULL;
 	if (A->m != B->m || A->n != B->n) {
 		return NULL;
 	}
 	mat* matrix_sum = create_matrix(A->n, A->m);
-	if(!matrix_sum) return NULL;
+	if(matrix_sum == NULL) return NULL;
 
 	for (int i = 0; i < A->n; i++) {
 		for (int j = 0; j < B->m; j++) {
@@ -124,34 +131,33 @@ mat* matrix_add(mat* A, mat* B)
 void matrix_free(mat* A)
 {
 	//fill in this funciton to free the matrix A.
-	if (!A) return;
-	for (int i = 0; i < A->n; i++)
+	if (A == NULL) return;
+	if (A->array != NULL)
 	{
-		free(A->array[i]);
+		for (int i = 0; i < A->n; i++)
+		{
+			if (A->array[i] != NULL) free(A->array[i]);
+		}
+		free(A->array);
 	}
-	free(A->array);
 	free(A);
 }
 
 int matrix_write(char* filename, mat* A)
 {
 	// write A to the binary file filename. If this fails for whatever reason, return 0.
+	if (A == NULL || filename == NULL) return 0;
 	FILE *file = fopen(filename, "wb");
 	if (file == NULL) {
 		return 0;
 	}
 	
-	if (fwrite(&A->n, sizeof(int), 1, file) != 1 ||
-        fwrite(&A->m, sizeof(int), 1, file) != 1) {
+	if (fwrite(&A->n, sizeof(int), 1, file) != 1 || fwrite(&A->m, sizeof(int), 1, file) != 1) {
         fclose(file);
         return 0;
     }
 
     for (int i = 0; i < A->n; i++) {
-		if (!A->array[i]) {
-			fclose(file);
-			return 0;
-		}
         if (fwrite(A->array[i], sizeof(double), A->m, file) != (size_t)A->m) {
             fclose(file);
             return 0;
@@ -165,11 +171,10 @@ int matrix_write(char* filename, mat* A)
 // fill this function to modify A into cA, that is, to multiply each entry of A by c.
 mat* matrix_scale(double c, mat* A)
 {
-	
+	if (A == NULL) return NULL;
 	mat* matrix_cA = create_matrix(A->n, A->m);
-    if (!matrix_cA) return NULL;
+    if (matrix_cA == NULL) return NULL;
 
-	
 	for (int i = 0; i < A->n; i++) {
 		for (int j = 0; j < A->m; j++) {
 			matrix_cA->array[i][j] = c * A->array[i][j];
