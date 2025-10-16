@@ -18,7 +18,7 @@ mat* create_matrix(int n, int m)
 
 	if (m <= 0 || n <= 0) return NULL;
 	mat* matrix = malloc(sizeof(mat));
-	if (!matrix) return NULL;
+	if (matrix == NULL) return NULL;
 	
 	matrix->n = n;
 	matrix->m = m;
@@ -30,15 +30,18 @@ mat* create_matrix(int n, int m)
 	}
 	
 	for(int i = 0; i < n; i++) {
-		matrix->array[i] = calloc(m, sizeof(double));
+		matrix->array[i] = malloc(m * sizeof(double));
 		if (matrix->array[i] == NULL) {
             for (int j = 0; j < i; j++) {
                 free(matrix->array[j]);
-            	free(matrix->array);
-            	free(matrix);
-            	return NULL;
 			}
-        }
+            free(matrix->array);
+        	free(matrix);
+        	return NULL;
+		}
+		for (int k = 0; k < m; k++) {
+			matrix->array[i][k] = 0.0;
+		}
 	}
 	return matrix;
 }
@@ -49,11 +52,13 @@ mat* matrix_read(char* filename)
 	// remember, matrices are stored in binary files in the following format:
 	// int n, int m, nxm doubles, where n is the num of rows, m the num of columns and the following doubles are the n rows of m elements in the matrix.
 	// if reading the matrix fails for whatever reason, you should return NULL.
+	if (filename == NULL) return NULL;
 	FILE* file = fopen(filename, "rb");
 	if (file == NULL)
 	{
 		return NULL;
 	}
+	
 	int n;
 	int m; 
 
@@ -74,7 +79,8 @@ mat* matrix_read(char* filename)
 	}
 
 	for (int i = 0; i < n; i++) {
-		if (fread(&matrix->array[i], sizeof(double), m, file) != (size_t)m)
+		size_t x = fread(&matrix->array[i], sizeof(double), m, file);
+		if (x != (size_t)m)
 		{
 			matrix_free(matrix);
 			fclose(file);
@@ -89,9 +95,8 @@ mat* matrix_multiply(mat* A, mat*B)
 {
 	//fill this function to return a new matrix AB, the product of A and B. Return NULL if the product does not exist.
 	if (A == NULL || B == NULL) return NULL;
-	if (A->m != B->n) {
-		return NULL;
-	}
+	if (A->m != B->n) return NULL;
+	
 
 	mat* matrix_AB = create_matrix(A->n, B->m);
 	if (matrix_AB == NULL) return NULL;
@@ -116,6 +121,7 @@ mat* matrix_add(mat* A, mat* B)
 	if (A->m != B->m || A->n != B->n) {
 		return NULL;
 	}
+	
 	mat* matrix_sum = create_matrix(A->n, A->m);
 	if(matrix_sum == NULL) return NULL;
 
