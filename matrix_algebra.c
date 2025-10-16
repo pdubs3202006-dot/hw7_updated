@@ -182,7 +182,7 @@ mat* matrix_scale(double c, mat* A)
 
 	for (int i = 0; i < A->n; i++) {
 		for (int j = 0; j < A->m; j++) {
-			matrix_cA->array[i][j] = c * A->array[i][j];
+			matrix_cA->array[i][j] = A->array[i][j] * c;
 		}
 	}
 	return matrix_cA;
