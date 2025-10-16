@@ -80,7 +80,6 @@ mat* matrix_read(char* filename)
 			fclose(file);
 			return NULL;
 		}
-		
 	}
 	fclose(file);
 	return (matrix);
